@@ -16,7 +16,7 @@ class Covid19Data {
         domainFn: (DataPoint p, _) => p.date,
         measureFn: (DataPoint p, _) => p.value,
         colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-      ),
+      ) ,
       new charts.Series(
         id: 'Recovered',
         data: recovered[index].dataPoints,

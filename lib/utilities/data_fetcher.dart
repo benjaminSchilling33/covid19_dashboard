@@ -13,12 +13,10 @@ import 'package:connectivity/connectivity.dart';
 import 'package:covid19_dashboard/model/covid19_data.dart';
 import 'package:covid19_dashboard/model/dataset.dart';
 import 'package:covid19_dashboard/utilities/data_parser.dart';
-import 'package:covid19_dashboard/utilities/file_storage.dart';
 import 'package:http/http.dart' as http;
 
 class DataSetFetcher {
   static Future<Covid19Data> fetchDataSet() async {
-
     File infectedFile;
     DateTime infectedLastModified;
     String infectedCsv;
@@ -36,7 +34,7 @@ class DataSetFetcher {
     String ifNoneMatchRecovered;
     String ifNoneMatchDead;
 
-
+/*
     ///Load the If-None-Match
     if (await FileStorage.) {
       ifNoneMatchInfected = await FileStorage.readIfNoneMatchFile();
@@ -44,7 +42,7 @@ class DataSetFetcher {
       ifNoneMatch = "";
     }
 
-
+*/
     /// Fetch the DataSet from the REST API
     /// Check for network connectivity
     ConnectivityResult connectivityResult =
