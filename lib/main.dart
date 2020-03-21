@@ -1,17 +1,25 @@
 import 'package:covid19_dashboard/model/covid19_data.dart';
 import 'package:covid19_dashboard/utilities/data_provider.dart';
+import 'package:covid19_dashboard/utilities/my_license_registerer.dart';
+import 'package:covid19_dashboard/utilities/syncfusion_license_registerer.dart';
 import 'package:covid19_dashboard/widgets/country_list.dart';
 import 'package:covid19_dashboard/widgets/covid_map.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_core/core.dart';
 
 void main() {
+  final SyncfusionLicenseRegisterer licenseRegisterer = MyLicenseRegisterer();
+  licenseRegisterer.registerLicense();
   runApp(ProviderWrapper());
 }
 
 class ProviderWrapper extends StatelessWidget {
+  ProviderWrapper();
+
   @override
   Widget build(BuildContext context) {
+    SyncfusionLicense.validateLicense(context);
     return ChangeNotifierProvider(
         create: (context) => DataProvider(), child: ThemeWrapper());
   }

@@ -67,8 +67,8 @@ class DataSetFetcher {
           .timeout(const Duration(seconds: 20))
           .catchError((e) {});
 
-      List<DataSet> infectedDataSet =
-          DataParser.parseData(utf8.decode(responseInfected.bodyBytes));
+      List<DataSet> infectedDataSet = DataParser.parseData(
+          utf8.decode(responseInfected.bodyBytes), Covid19Data.colorInfected);
 
       final responseRecovered = await http
           .get(
@@ -81,8 +81,8 @@ class DataSetFetcher {
           .timeout(const Duration(seconds: 20))
           .catchError((e) {});
 
-      List<DataSet> recoveredDataSet =
-          DataParser.parseData(utf8.decode(responseRecovered.bodyBytes));
+      List<DataSet> recoveredDataSet = DataParser.parseData(
+          utf8.decode(responseRecovered.bodyBytes), Covid19Data.colorRecovered);
 
       final deathInfected = await http
           .get(
@@ -95,8 +95,8 @@ class DataSetFetcher {
           .timeout(const Duration(seconds: 20))
           .catchError((e) {});
 
-      List<DataSet> deathDataSet =
-          DataParser.parseData(utf8.decode(deathInfected.bodyBytes));
+      List<DataSet> deathDataSet = DataParser.parseData(
+          utf8.decode(deathInfected.bodyBytes), Covid19Data.colorDead);
 
       Covid19Data data = Covid19Data(
         infected: infectedDataSet,

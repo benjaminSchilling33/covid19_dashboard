@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:covid19_dashboard/model/covid19_data.dart';
 import 'package:covid19_dashboard/utilities/data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -63,17 +64,15 @@ class MapSampleState extends State<MapSample> {
           ),
         ),
       );
-      circles.add(Circle(
-          circleId: CircleId("infected-" + dp.provinceState + dp.countyRegion),
-          center: dp.coords,
-          radius: dp.lastValue.roundToDouble() * 10,
-          strokeWidth: 1,
-          fillColor: Color.fromARGB(
-            70,
-            dataProvider.covidData.getColorInfected().r,
-            dataProvider.covidData.getColorInfected().g,
-            dataProvider.covidData.getColorInfected().b,
-          )));
+      circles.add(
+        Circle(
+            circleId:
+                CircleId("infected-" + dp.provinceState + dp.countyRegion),
+            center: dp.coords,
+            radius: dp.lastValue.roundToDouble() * 10,
+            strokeWidth: 1,
+            fillColor: Covid19Data.colorInfected),
+      );
     });
     dataProvider.covidData.recovered.forEach((dp) {
       circles.add(
@@ -82,12 +81,7 @@ class MapSampleState extends State<MapSample> {
           center: dp.coords,
           radius: dp.lastValue.roundToDouble() * 10,
           strokeWidth: 1,
-          fillColor: Color.fromARGB(
-            70,
-            dataProvider.covidData.getColorRecovered().r,
-            dataProvider.covidData.getColorRecovered().g,
-            dataProvider.covidData.getColorRecovered().b,
-          ),
+          fillColor: Covid19Data.colorRecovered,
         ),
       );
     });
@@ -98,12 +92,7 @@ class MapSampleState extends State<MapSample> {
           center: dp.coords,
           radius: dp.lastValue.roundToDouble() * 10,
           strokeWidth: 1,
-          fillColor: Color.fromARGB(
-            70,
-            dataProvider.covidData.getColorDead().r,
-            dataProvider.covidData.getColorDead().g,
-            dataProvider.covidData.getColorDead().b,
-          ),
+          fillColor: Covid19Data.colorDead,
         ),
       );
     });

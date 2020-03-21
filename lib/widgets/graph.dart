@@ -1,15 +1,21 @@
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:covid19_dashboard/model/dataset.dart';
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class Graph extends StatelessWidget {
   String name;
-  final List<charts.Series<DataPoint, DateTime>> values;
+  final List<DataPoint> infected;
 
-  Graph({this.name, this.values});
+  final List<DataPoint> recovered;
+
+  final List<DataPoint> dead;
+
+  Graph({this.name, this.infected, this.recovered, this.dead});
 
   @override
   Widget build(BuildContext context) {
+    // this.infected.removeWhere((dp) => dp.value <= 0);
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -21,12 +27,44 @@ class Graph extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: Container(
-                child: charts.TimeSeriesChart(
-                  this.values,
-                  defaultRenderer:
-                      new charts.LineRendererConfig(includePoints: true),
-                  behaviors: [
-                    new charts.SeriesLegend(),
+                child: SfCartesianChart(
+                  primaryXAxis: DateTimeAxis(
+                    visibleMaximum: DateTime.utc(2020, 12, 31),
+                  ),
+                  primaryYAxis: LogarithmicAxis(),
+                  tooltipBehavior: TooltipBehavior(enable: true),
+                  legend: Legend(
+                    isVisible: true,
+                  ),
+                  zoomPanBehavior: ZoomPanBehavior(
+                      // Enables pinch zooming
+                      enablePinching: true),
+                  series: <ChartSeries>[
+                    LineSeries<DataPoint, DateTime>(
+                      trendlines: <Trendline>[
+                        Trendline(
+                            type: TrendlineType.logarithmic, color: Colors.blue)
+                      ],
+                      name: 'Infected',
+                      dataSource: this.infected,
+                      xValueMapper: (DataPoint dp, _) => dp.date,
+                      yValueMapper: (DataPoint dp, _) => dp.value,
+                      pointColorMapper: (DataPoint dp, _) => dp.color,
+                    ),
+                    LineSeries<DataPoint, DateTime>(
+                      name: 'Recovered',
+                      dataSource: this.recovered,
+                      xValueMapper: (DataPoint dp, _) => dp.date,
+                      yValueMapper: (DataPoint dp, _) => dp.value,
+                      pointColorMapper: (DataPoint dp, _) => dp.color,
+                    ),
+                    LineSeries<DataPoint, DateTime>(
+                      name: 'Dead',
+                      dataSource: this.dead,
+                      xValueMapper: (DataPoint dp, _) => dp.date,
+                      yValueMapper: (DataPoint dp, _) => dp.value,
+                      pointColorMapper: (DataPoint dp, _) => dp.color,
+                    ),
                   ],
                 ),
               ),
@@ -37,14 +75,3 @@ class Graph extends StatelessWidget {
     );
   }
 }
-
-/*
-child: Column(
-        children: <Widget>[
-          Text(this.name),
-          Container(
-            child: charts.LineChart(this.values),
-          ),
-        ],
-      ),
- */

@@ -28,8 +28,12 @@ class CountryList extends StatelessWidget {
                         return Graph(
                           name:
                               '${dataProvider.covidData.infected[index].provinceState} ${dataProvider.covidData.infected[index].provinceState == "" ? "" : ','} ${dataProvider.covidData.infected[index].countyRegion}',
-                          values: dataProvider.covidData
-                              .getDataSeriesForEntry(index),
+                          infected: dataProvider.covidData
+                              .getInfectedSeriesForEntry(index),
+                          recovered: dataProvider.covidData
+                              .getRecoveredSeriesForEntry(index),
+                          dead: dataProvider.covidData
+                              .getDeadSeriesForEntry(index),
                         );
                       },
                     ),
