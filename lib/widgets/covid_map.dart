@@ -1,13 +1,14 @@
 import 'dart:async';
 
-import 'package:covid19_dashboard/model/covid19_data.dart';
+import 'package:covid19_dashboard/utilities/data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
 class CovidMap extends StatelessWidget {
-  Covid19Data data;
+  DataProvider dataProvider;
 
-  CovidMap({this.data});
+  CovidMap({this.dataProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -22,32 +23,34 @@ class CovidMap extends StatelessWidget {
         ),
       ),
       body: MapSample(
-        data: this.data,
+        dataProvider: dataProvider,
       ),
     );
   }
 }
 
 class MapSample extends StatefulWidget {
-  Covid19Data data;
+  DataProvider dataProvider;
 
-  MapSample({this.data});
+  MapSample({this.dataProvider});
   @override
-  State<MapSample> createState() => MapSampleState(data: this.data);
+  State<MapSample> createState() =>
+      MapSampleState(dataProvider: this.dataProvider);
 }
 
 class MapSampleState extends State<MapSample> {
-  Covid19Data data;
+  DataProvider dataProvider;
 
+  bool showMarkers = true;
   Completer<GoogleMapController> _controller = Completer();
 
-  MapSampleState({this.data});
+  MapSampleState({this.dataProvider});
 
   @override
   Widget build(BuildContext context) {
     Set<Circle> circles = Set<Circle>();
     Set<Marker> markers = Set<Marker>();
-    data.infected.forEach((dp) {
+    dataProvider.covidData.infected.forEach((dp) {
       markers.add(
         Marker(
           markerId: MarkerId(dp.provinceState + dp.countyRegion),
@@ -56,37 +59,78 @@ class MapSampleState extends State<MapSample> {
             title: (dp.provinceState +
                 (dp.provinceState != "" ? ", " : "") +
                 dp.countyRegion +
-                "\n I: ${dp.valueSum}"),
+                " I: ${dp.lastValue}"),
           ),
         ),
       );
       circles.add(Circle(
-          circleId: CircleId(dp.provinceState + dp.countyRegion),
+          circleId: CircleId("infected-" + dp.provinceState + dp.countyRegion),
           center: dp.coords,
-          radius: dp.valueSum.roundToDouble(),
+          radius: dp.lastValue.roundToDouble() * 10,
           strokeWidth: 1,
           fillColor: Color.fromARGB(
-              data.getColorInfected().a,
-              data.getColorInfected().r,
-              data.getColorInfected().g,
-              data.getColorInfected().b)));
+            70,
+            dataProvider.covidData.getColorInfected().r,
+            dataProvider.covidData.getColorInfected().g,
+            dataProvider.covidData.getColorInfected().b,
+          )));
     });
-
-    return new Scaffold(
-        body: GoogleMap(
-      mapType: MapType.satellite,
-      scrollGesturesEnabled: true,
-      zoomGesturesEnabled: true,
-      mapToolbarEnabled: false,
-      initialCameraPosition: CameraPosition(
-        target: LatLng(51.287799, 10.362071),
-        zoom: 5,
-      ),
-      circles: circles,
-      markers: markers,
-      onMapCreated: (GoogleMapController controller) {
-        _controller.complete(controller);
-      },
-    ));
+    dataProvider.covidData.recovered.forEach((dp) {
+      circles.add(
+        Circle(
+          circleId: CircleId("recovered-" + dp.provinceState + dp.countyRegion),
+          center: dp.coords,
+          radius: dp.lastValue.roundToDouble() * 10,
+          strokeWidth: 1,
+          fillColor: Color.fromARGB(
+            70,
+            dataProvider.covidData.getColorRecovered().r,
+            dataProvider.covidData.getColorRecovered().g,
+            dataProvider.covidData.getColorRecovered().b,
+          ),
+        ),
+      );
+    });
+    dataProvider.covidData.dead.forEach((dp) {
+      circles.add(
+        Circle(
+          circleId: CircleId("dead-" + dp.provinceState + dp.countyRegion),
+          center: dp.coords,
+          radius: dp.lastValue.roundToDouble() * 10,
+          strokeWidth: 1,
+          fillColor: Color.fromARGB(
+            70,
+            dataProvider.covidData.getColorDead().r,
+            dataProvider.covidData.getColorDead().g,
+            dataProvider.covidData.getColorDead().b,
+          ),
+        ),
+      );
+    });
+    return Consumer<DataProvider>(
+        builder: (context, model, child) => Scaffold(
+              body: GoogleMap(
+                mapType: MapType.satellite,
+                scrollGesturesEnabled: true,
+                zoomGesturesEnabled: true,
+                mapToolbarEnabled: false,
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(51.287799, 10.362071),
+                  zoom: 5,
+                ),
+                circles: circles,
+                markers: dataProvider.showMarkers ? markers : null,
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+                },
+              ),
+              floatingActionButton: FloatingActionButton.extended(
+                onPressed: () {
+                  dataProvider.toggleMarkers();
+                },
+                label: Text('Show Markers'),
+                icon: Icon(Icons.map),
+              ),
+            ));
   }
 }

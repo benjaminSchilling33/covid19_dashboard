@@ -1,18 +1,27 @@
 import 'package:covid19_dashboard/model/covid19_data.dart';
-import 'package:covid19_dashboard/utilities/data_fetcher.dart';
+import 'package:covid19_dashboard/utilities/data_provider.dart';
 import 'package:covid19_dashboard/widgets/country_list.dart';
 import 'package:covid19_dashboard/widgets/covid_map.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(ThemeWrapper());
+  runApp(ProviderWrapper());
+}
+
+class ProviderWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+        create: (context) => DataProvider(), child: ThemeWrapper());
+  }
 }
 
 class ThemeWrapper extends StatelessWidget {
   ThemeWrapper({Key key}) : super(key: key);
 
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       theme: ThemeData(
         brightness: Brightness.dark,
         backgroundColor: Color(0xff000000),
@@ -83,85 +92,83 @@ class ThemeWrapper extends StatelessWidget {
 class Covid19DashboardApp extends StatelessWidget {
   Covid19DashboardApp({Key key}) : super(key: key);
 
+  @override
   Widget build(BuildContext context) {
-    Future<Covid19Data> data = DataSetFetcher.fetchDataSet();
-    return FutureBuilder<Covid19Data>(
-      future: data,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return new MaterialApp(
-            theme: Theme.of(context),
-            title: 'Covid19 Dashboard',
-            home: Scaffold(
-              appBar: AppBar(
-                title: Text('Covid-19 Dashboard'),
-              ),
-              body: Container(
-                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: Column(
-                  children: <Widget>[
-                    RaisedButton(
-                      child: Text('Country List'),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return CountryList(
-                                data: snapshot.data,
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                    RaisedButton(
-                      child: Text('Map'),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return CovidMap(
-                                data: snapshot.data,
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    )
-                  ],
-                ),
-              ),
-            ),
-          );
-        } else {
-          return new MaterialApp(
-            theme: Theme.of(context),
-            title: 'Covid19Dashboard',
-            home: SafeArea(
-              child: Scaffold(
+    return Consumer<DataProvider>(
+      builder: (context, dataProvider, child) => FutureBuilder<Covid19Data>(
+        future: dataProvider.futureCovidData,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            dataProvider.initializeProvider(snapshot.data);
+            return MaterialApp(
+              theme: Theme.of(context),
+              title: 'Covid-19 Dashboard',
+              home: Scaffold(
                 appBar: AppBar(
                   title: Text('Covid-19 Dashboard'),
                 ),
-                backgroundColor: Color(0xff000000),
-                body: Center(
+                body: Container(
+                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      CircularProgressIndicator(),
-                      Container(
-                        child: Text('Fetching data'),
-                        padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                      RaisedButton(
+                        child: Text('Country List'),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  CountryList(dataProvider: dataProvider),
+                            ),
+                          );
+                        },
                       ),
+                      RaisedButton(
+                        child: Text('Map'),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  CovidMap(dataProvider: dataProvider),
+                            ),
+                          );
+                        },
+                      )
                     ],
                   ),
                 ),
               ),
-            ),
-          );
-        }
-      },
+            );
+          } else {
+            return new MaterialApp(
+              theme: Theme.of(context),
+              title: 'Covid19Dashboard',
+              home: SafeArea(
+                child: Scaffold(
+                  appBar: AppBar(
+                    title: Text('Covid-19 Dashboard'),
+                  ),
+                  backgroundColor: Color(0xff000000),
+                  body: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        CircularProgressIndicator(),
+                        Container(
+                          child: Text('Fetching data'),
+                          padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }

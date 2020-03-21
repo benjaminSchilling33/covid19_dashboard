@@ -7,14 +7,14 @@ class DataSet {
   String countyRegion;
   LatLng coords;
   List<DataPoint> dataPoints;
-  int valueSum;
+  int lastValue;
 
   DataSet({
     this.provinceState,
     this.countyRegion,
     this.coords,
     this.dataPoints,
-    this.valueSum,
+    this.lastValue,
   });
 
   factory DataSet.fromEntry(String headline, String entry) {
@@ -26,17 +26,13 @@ class DataSet {
       countyRegion: entries[1],
       coords: LatLng(double.parse(entries[2]), double.parse(entries[3])),
       dataPoints: entriesToDataPoints(entries.sublist(4), headlines.sublist(4)),
-      valueSum: entryValuesToSum(
+      lastValue: lastValueOfEntries(
           entriesToDataPoints(entries.sublist(4), headlines.sublist(4))),
     );
   }
 
-  static int entryValuesToSum(List<DataPoint> dataPoints) {
-    int sum = 0;
-    dataPoints.forEach((dp) {
-      sum = sum + dp.value;
-    });
-    return sum;
+  static int lastValueOfEntries(List<DataPoint> dataPoints) {
+    return dataPoints.last.value;
   }
 
   static List<DataPoint> entriesToDataPoints(
