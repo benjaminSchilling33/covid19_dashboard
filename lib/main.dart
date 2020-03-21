@@ -1,6 +1,7 @@
 import 'package:covid19_dashboard/model/covid19_data.dart';
 import 'package:covid19_dashboard/utilities/data_fetcher.dart';
 import 'package:covid19_dashboard/widgets/country_list.dart';
+import 'package:covid19_dashboard/widgets/covid_map.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -90,9 +91,48 @@ class Covid19DashboardApp extends StatelessWidget {
         if (snapshot.hasData) {
           return new MaterialApp(
             theme: Theme.of(context),
-            title: 'Covid19Dashboard',
-            home: CountryList(
-              data: snapshot.data,
+            title: 'Covid19 Dashboard',
+            home: Scaffold(
+              appBar: AppBar(
+                title: Text('Covid-19 Dashboard'),
+              ),
+              body: Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Column(
+                  children: <Widget>[
+                    RaisedButton(
+                      child: Text('Country List'),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return CountryList(
+                                data: snapshot.data,
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                    RaisedButton(
+                      child: Text('Map'),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return CovidMap(
+                                data: snapshot.data,
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    )
+                  ],
+                ),
+              ),
             ),
           );
         } else {

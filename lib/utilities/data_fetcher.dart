@@ -101,7 +101,7 @@ class DataSetFetcher {
       Covid19Data data = Covid19Data(
         infected: infectedDataSet,
         recovered: recoveredDataSet,
-        death: deathDataSet,
+        dead: deathDataSet,
       );
       return data;
 /*
