@@ -15,7 +15,7 @@ void main() {
 }
 
 class ProviderWrapper extends StatelessWidget {
-  ProviderWrapper();
+  ProviderWrapper({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

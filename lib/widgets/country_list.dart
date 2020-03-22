@@ -3,7 +3,7 @@ import 'package:covid19_dashboard/widgets/graph.dart';
 import 'package:flutter/material.dart';
 
 class CountryList extends StatelessWidget {
-  DataProvider dataProvider;
+  final DataProvider dataProvider;
   CountryList({this.dataProvider});
 
   @override

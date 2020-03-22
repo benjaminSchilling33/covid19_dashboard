@@ -19,7 +19,7 @@ samples, guidance on mobile development, and a full API reference.
 ## How to add the Syncfusion License
 
 Create a class called `MyLicenseRegisterer` extending `SyncfusionLicenseRegisterer`.
-Make sure to pass your license key to the
+Make sure to pass your license key to the constructor of `SyncfusionLicenseRegisterer` via `super`.
 
 ```dart
 import 'package:covid19_dashboard/utilities/syncfusion_license_registerer.dart';
@@ -30,6 +30,15 @@ class MyLicenseRegisterer extends SyncfusionLicenseRegisterer {
 }
 ```
 
+Additionally you have to store copy the Manifest template files to the correct location.
 
+```
+AndroidManifest.xml.template-main to android/app/src/main/AndroidManifest.xml
+AndroidManifest.xml.template-debug to android/app/src/debug/AndroidManifest.xml
+AndroidManifest.xml.template-profile to android/app/src/profile/AndroidManifest.xml
+```
+And don't forget to put your Google Maps API key to the value of the following entry:
+
+`<meta-data android:name="com.google.android.geo.API_KEY" android:value=""/>`
 
 

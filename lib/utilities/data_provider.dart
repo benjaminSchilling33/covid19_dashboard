@@ -17,6 +17,7 @@ class DataProvider extends ChangeNotifier {
   void initializeProvider(Covid19Data covid19Data) async {
     if (!isInitialized) {
       this.covidData = covid19Data;
+      this.covidData.initializeDataForMap();
       isInitialized = true;
     }
   }

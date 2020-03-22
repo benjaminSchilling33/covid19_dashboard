@@ -1,6 +1,5 @@
 import 'dart:core';
 
-import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class DataSet {
@@ -18,23 +17,21 @@ class DataSet {
     this.lastValue,
   });
 
-  factory DataSet.fromEntry(String headline, String entry, Color color) {
+  factory DataSet.fromEntry(String headline, String entry) {
     List<String> entries = entry.split(new RegExp(r',(?![\s\w\.]+\")'));
 
     List<String> headlines = headline.split(',');
     return DataSet(
-      provinceState: entries[0],
-      countyRegion: entries[1],
+      provinceState: entries[0].replaceAll('\"', ''),
+      countyRegion: entries[1].replaceAll('\"', ''),
       coords: LatLng(double.parse(entries[2]), double.parse(entries[3])),
       dataPoints: entriesToDataPoints(
         entries.sublist(4),
         headlines.sublist(4),
-        color,
       ),
       lastValue: lastValueOfEntries(entriesToDataPoints(
         entries.sublist(4),
         headlines.sublist(4),
-        color,
       )),
     );
   }
@@ -44,7 +41,7 @@ class DataSet {
   }
 
   static List<DataPoint> entriesToDataPoints(
-      List<String> entries, List<String> headlines, Color color) {
+      List<String> entries, List<String> headlines) {
     List<DataPoint> points = List<DataPoint>();
     for (int i = 0; i < entries.length; i++) {
       String date = headlines[i];
@@ -60,7 +57,6 @@ class DataSet {
       points.add(DataPoint(
         date: DateTime.parse(dateCorrectFormat),
         value: int.parse(entries[i]),
-        color: color,
       ));
     }
     return points;
@@ -70,7 +66,6 @@ class DataSet {
 class DataPoint {
   DateTime date;
   int value;
-  Color color;
 
-  DataPoint({this.date, this.value, this.color});
+  DataPoint({this.date, this.value});
 }
