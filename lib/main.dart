@@ -1,3 +1,10 @@
+/*
+covid19_dashboard
+This is the dart file containing the main function and the app entry point.
+SPDX-License-Identifier: GPL-2.0-only
+Copyright (C) 2020 Benjamin Schilling
+*/
+
 import 'package:covid19_dashboard/model/covid19_data.dart';
 import 'package:covid19_dashboard/utilities/data_provider.dart';
 import 'package:covid19_dashboard/utilities/my_license_registerer.dart';
@@ -11,6 +18,7 @@ import 'package:syncfusion_flutter_core/core.dart';
 void main() {
   final SyncfusionLicenseRegisterer licenseRegisterer = MyLicenseRegisterer();
   licenseRegisterer.registerLicense();
+  SyncfusionLicense.validateLicense();
   runApp(ProviderWrapper());
 }
 
@@ -19,7 +27,6 @@ class ProviderWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SyncfusionLicense.validateLicense(context);
     return ChangeNotifierProvider(
         create: (context) => DataProvider(), child: ThemeWrapper());
   }
@@ -107,48 +114,80 @@ class Covid19DashboardApp extends StatelessWidget {
         future: dataProvider.futureCovidData,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            dataProvider.initializeProvider(snapshot.data);
-            return MaterialApp(
-              theme: Theme.of(context),
-              title: 'Covid-19 Dashboard',
-              home: Scaffold(
-                appBar: AppBar(
-                  title: Text('Covid-19 Dashboard'),
-                ),
-                body: Container(
-                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      RaisedButton(
-                        child: Text('Country List'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  CountryList(dataProvider: dataProvider),
-                            ),
-                          );
-                        },
-                      ),
-                      RaisedButton(
-                        child: Text('Map'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  CovidMap(dataProvider: dataProvider),
-                            ),
-                          );
-                        },
-                      )
-                    ],
+            if (!snapshot.data.fetchingFailed) {
+              dataProvider.initializeProvider(snapshot.data, context);
+              return MaterialApp(
+                theme: Theme.of(context),
+                title: 'Covid-19 Dashboard',
+                home: Scaffold(
+                  appBar: AppBar(
+                    title: Text('Covid-19 Dashboard'),
+                  ),
+                  body: Container(
+                    padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                          child: RaisedButton(
+                            child: Text('Country List'),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CountryListState(
+                                      dataProvider: dataProvider),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                          child: RaisedButton(
+                            child: Text('Map'),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      CovidMap(dataProvider: dataProvider),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
+              );
+            } else {
+              return new MaterialApp(
+                theme: Theme.of(context),
+                title: 'Covid19Dashboard',
+                home: SafeArea(
+                  child: Scaffold(
+                    appBar: AppBar(
+                      title: Text('Covid-19 Dashboard'),
+                    ),
+                    backgroundColor: Color(0xff000000),
+                    body: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            child: Text('Fetching failed'),
+                            padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
           } else {
             return new MaterialApp(
               theme: Theme.of(context),

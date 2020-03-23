@@ -41,3 +41,4 @@ lib/generated_plugin_registrant.dart
 /android/app/src/debug/AndroidManifest.xml
 /android/app/src/main/AndroidManifest.xml
 /android/app/src/profile/AndroidManifest.xml
+/android/key.properties

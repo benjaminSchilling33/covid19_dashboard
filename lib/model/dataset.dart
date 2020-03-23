@@ -1,3 +1,10 @@
+/*
+covid19_dashboard
+This is the dart file containing the DataSet class used to store the data set of a region/country.
+SPDX-License-Identifier: GPL-2.0-only
+Copyright (C) 2020 Benjamin Schilling
+*/
+
 import 'dart:core';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -8,6 +15,7 @@ class DataSet {
   LatLng coords;
   List<DataPoint> dataPoints;
   int lastValue;
+  DateTime lastDate;
 
   DataSet({
     this.provinceState,
@@ -15,6 +23,7 @@ class DataSet {
     this.coords,
     this.dataPoints,
     this.lastValue,
+    this.lastDate,
   });
 
   factory DataSet.fromEntry(String headline, String entry) {
@@ -22,18 +31,25 @@ class DataSet {
 
     List<String> headlines = headline.split(',');
     return DataSet(
-      provinceState: entries[0].replaceAll('\"', ''),
-      countyRegion: entries[1].replaceAll('\"', ''),
-      coords: LatLng(double.parse(entries[2]), double.parse(entries[3])),
-      dataPoints: entriesToDataPoints(
-        entries.sublist(4),
-        headlines.sublist(4),
-      ),
-      lastValue: lastValueOfEntries(entriesToDataPoints(
-        entries.sublist(4),
-        headlines.sublist(4),
-      )),
-    );
+        provinceState: entries[0].replaceAll('\"', ''),
+        countyRegion: entries[1].replaceAll('\"', ''),
+        coords: LatLng(double.parse(entries[2]), double.parse(entries[3])),
+        dataPoints: entriesToDataPoints(
+          entries.sublist(4),
+          headlines.sublist(4),
+        ),
+        lastValue: lastValueOfEntries(entriesToDataPoints(
+          entries.sublist(4),
+          headlines.sublist(4),
+        )),
+        lastDate: lastDateOfEntries(entriesToDataPoints(
+          entries.sublist(4),
+          headlines.sublist(4),
+        )));
+  }
+
+  static DateTime lastDateOfEntries(List<DataPoint> dataPoints) {
+    return dataPoints.last.date;
   }
 
   static int lastValueOfEntries(List<DataPoint> dataPoints) {

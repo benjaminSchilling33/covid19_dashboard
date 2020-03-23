@@ -1,3 +1,10 @@
+/*
+covid19_dashboard
+This is the dart file containing the DataParser class used to parse a CSV file and generate the data sets from it.
+SPDX-License-Identifier: GPL-2.0-only
+Copyright (C) 2020 Benjamin Schilling
+*/
+
 import 'package:covid19_dashboard/model/dataset.dart';
 
 class DataParser {

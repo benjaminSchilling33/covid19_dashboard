@@ -1,0 +1,10 @@
+This app shows the number of cases reported by the John Hopkins University.
+It can draw a graph with the case numbers of infected, recovered and deceased.
+The graph can be displayed linear or logarithmic.
+Additionally it shows a map circulars indicating the number of cases in a certain region.
+
+Developed as Open Source (GPL v2):
+https://github.com/benjaminSchilling33/covid19_dashboard
+
+The data source can be found here:
+https://github.com/CSSEGISandData/COVID-19

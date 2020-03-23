@@ -2,19 +2,25 @@
 
 A flutter application showing the latest statistics about Covid19
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+## How to build
 
-A few resources to get you started if this is your first Flutter project:
+Build the app using `flutter build apk --split-per-abi`.
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+## How to build for release
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Increment the `flutterVersionCode` and `flutterVersionName` in `android/app/build.gradle` as well as `version` in pubspec.yaml
 
+Required `key.properties` in `./android/`.
+
+Content:
+
+```
+storePassword=<Keystore Password>
+keyPassword=<Key Password>
+keyAlias=<Alias>
+storeFile=<Location of the Keystore>
+```
 
 ## How to add the Syncfusion License
 
@@ -41,4 +47,11 @@ And don't forget to put your Google Maps API key to the value of the following e
 
 `<meta-data android:name="com.google.android.geo.API_KEY" android:value=""/>`
 
+## License
+SPDX-License-Identifier: GPL-2.0-only
 
+The full version of the license can be found in LICENSE.
+
+## Copyright
+Copyright (C) 2020 Benjamin Schilling
+Design by Fabian Schilling

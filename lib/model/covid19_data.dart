@@ -1,3 +1,10 @@
+/*
+covid19_dashboard
+This is the dart file containing the Covid19Data class used to store all statistics data.
+SPDX-License-Identifier: GPL-2.0-only
+Copyright (C) 2020 Benjamin Schilling
+*/
+
 import 'package:covid19_dashboard/model/dataset.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -5,37 +12,63 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class Covid19Data {
   List<DataSet> infected;
   List<DataSet> recovered;
-  List<DataSet> dead;
+  List<DataSet> deceased;
+  bool fetchingFailed = false;
 
   Set<Circle> circles;
   Set<Marker> markers;
-  Covid19Data({this.infected, this.recovered, this.dead});
+  Covid19Data(
+      {this.infected,
+      this.recovered,
+      this.deceased,
+      this.fetchingFailed = false});
 
   static Color colorInfected = Colors.blue;
   static Color colorRecovered = Colors.green;
-  static Color colorDead = Colors.red;
+  static Color colorDeceased = Colors.red;
 
-  initializeDataForMap() {
+  initializeDataForMap(BuildContext context) {
     circles = Set<Circle>();
     markers = Set<Marker>();
-    infected.forEach((dp) {
+    for (int i = 0; i < infected.length; i++) {
       markers.add(
         Marker(
-          markerId: MarkerId(dp.provinceState + dp.countyRegion),
-          position: dp.coords,
-          infoWindow: InfoWindow(
-            title: dp.provinceState +
-                (dp.provinceState != "" ? ", " : "") +
-                dp.countyRegion +
-                " I: ${dp.lastValue}",
+          markerId:
+              MarkerId(infected[i].provinceState + infected[i].countyRegion),
+          position: infected[i].coords,
+          onTap: () => showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              String dialogTitle;
+              if (infected[i].provinceState == infected[i].countyRegion) {
+                dialogTitle = infected[i].countyRegion;
+              } else {
+                dialogTitle = infected[i].provinceState +
+                    (infected[i].provinceState == '' ? '' : ', ') +
+                    infected[i].countyRegion;
+              }
+              String dialogDate =
+                  "${infected[i].lastDate.year}-${infected[i].lastDate.month}-${infected[i].lastDate.day}";
+              return SimpleDialog(
+                contentPadding: EdgeInsets.all(10),
+                title: Text('$dialogTitle - $dialogDate'),
+                children: <Widget>[
+                  Text('Infected: ${infected[i].lastValue}'),
+                  Text('Recovered: ${recovered[i].lastValue}'),
+                  Text('Deceased: ${deceased[i].lastValue}'),
+                ],
+              );
+            },
           ),
         ),
       );
       circles.add(
         Circle(
-          circleId: CircleId("infected-" + dp.provinceState + dp.countyRegion),
-          center: dp.coords,
-          radius: dp.lastValue.roundToDouble() * 10,
+          circleId: CircleId("infected-" +
+              infected[i].provinceState +
+              infected[i].countyRegion),
+          center: infected[i].coords,
+          radius: infected[i].lastValue.roundToDouble() * 10,
           strokeWidth: 1,
           zIndex: 1,
           fillColor: Color.fromARGB(
@@ -46,7 +79,7 @@ class Covid19Data {
           ),
         ),
       );
-    });
+    }
     recovered.forEach((dp) {
       circles.add(
         Circle(
@@ -64,19 +97,19 @@ class Covid19Data {
         ),
       );
     });
-    dead.forEach((dp) {
+    deceased.forEach((dp) {
       circles.add(
         Circle(
-          circleId: CircleId("dead-" + dp.provinceState + dp.countyRegion),
+          circleId: CircleId("deceased-" + dp.provinceState + dp.countyRegion),
           center: dp.coords,
           radius: dp.lastValue.roundToDouble() * 10,
           strokeWidth: 1,
           zIndex: 3,
           fillColor: Color.fromARGB(
             70,
-            Covid19Data.colorDead.red,
-            Covid19Data.colorDead.green,
-            Covid19Data.colorDead.blue,
+            Covid19Data.colorDeceased.red,
+            Covid19Data.colorDeceased.green,
+            Covid19Data.colorDeceased.blue,
           ),
         ),
       );
@@ -91,7 +124,7 @@ class Covid19Data {
     return recovered[index].dataPoints;
   }
 
-  List<DataPoint> getDeadSeriesForEntry(int index) {
-    return dead[index].dataPoints;
+  List<DataPoint> getDeceasedSeriesForEntry(int index) {
+    return deceased[index].dataPoints;
   }
 }

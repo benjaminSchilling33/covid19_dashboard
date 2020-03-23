@@ -1,3 +1,10 @@
+/*
+covid19_dashboard
+This is the dart file containing the CovidMap widget showing a world map with the number of infected etc. drawn as circles.
+SPDX-License-Identifier: GPL-2.0-only
+Copyright (C) 2020 Benjamin Schilling
+*/
+
 import 'dart:async';
 
 import 'package:covid19_dashboard/utilities/data_provider.dart';

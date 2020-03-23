@@ -1,8 +1,8 @@
 /*
-congress_fahrplan
-This is the dart file containing the FahrplanFetcher class needed to fetch the Fahrplan.
+covid19_dashboard
+This is the dart file containing the DataSetFetcher class needed to fetch the data of JHU CSSE.
 SPDX-License-Identifier: GPL-2.0-only
-Copyright (C) 2019 Benjamin Schilling
+Copyright (C) 2020 Benjamin Schilling
 */
 
 import 'dart:async';
@@ -13,36 +13,47 @@ import 'package:connectivity/connectivity.dart';
 import 'package:covid19_dashboard/model/covid19_data.dart';
 import 'package:covid19_dashboard/model/dataset.dart';
 import 'package:covid19_dashboard/utilities/data_parser.dart';
+import 'package:covid19_dashboard/utilities/file_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class DataSetFetcher {
   static Future<Covid19Data> fetchDataSet() async {
+    bool fetchingFailed = false;
+
     File infectedFile;
-    DateTime infectedLastModified;
-    String infectedCsv;
+    List<DataSet> infectedDataSet;
 
     File recoveredFile;
-    DateTime recoveredLastModified;
-    String recoveredCsv;
+    List<DataSet> recoveredDataSet;
 
-    File deadFile;
-    DateTime deadLastModified;
-    String deadCsv;
+    File deceasedFile;
+    List<DataSet> deceasedDataSet;
 
     /// Used to reduce traffic
     String ifNoneMatchInfected;
     String ifNoneMatchRecovered;
-    String ifNoneMatchDead;
+    String ifNoneMatchDeceased;
+    String etagInfected;
+    String etagRecovered;
+    String etagDeceased;
 
-/*
-    ///Load the If-None-Match
-    if (await FileStorage.) {
-      ifNoneMatchInfected = await FileStorage.readIfNoneMatchFile();
+    ///Load the If-None-Matches
+    if (await FileStorage.etagFileAvailable) {
+      ifNoneMatchInfected = await FileStorage.getValueOfEtag('etagInfected');
+      ifNoneMatchRecovered = await FileStorage.getValueOfEtag('etagRecovered');
+      ifNoneMatchDeceased = await FileStorage.getValueOfEtag('etagDeceased');
     } else {
-      ifNoneMatch = "";
+      ifNoneMatchInfected = "";
+      ifNoneMatchRecovered = "";
+      ifNoneMatchDeceased = "";
     }
 
-*/
+    ///Load all files
+    infectedFile = await FileStorage.localInfectedFile;
+    recoveredFile = await FileStorage.localRecoveredFile;
+    deceasedFile = await FileStorage.localDeceasedFile;
+
     /// Fetch the DataSet from the REST API
     /// Check for network connectivity
     ConnectivityResult connectivityResult =
@@ -59,129 +70,142 @@ class DataSetFetcher {
       final responseInfected = await http
           .get(
             '$requestStringInfected',
-            /* headers: {
-              "If-Modified-Since": ifModifiedSince,
-              "If-None-Match": ifNoneMatch,
-            },*/
+            headers: {
+              "If-None-Match": ifNoneMatchInfected,
+            },
           )
           .timeout(const Duration(seconds: 20))
           .catchError((e) {});
 
-      List<DataSet> infectedDataSet = DataParser.parseData(
-          utf8.decode(responseInfected.bodyBytes));
+      if (responseInfected != null) {
+        if (responseInfected.statusCode == 200 &&
+            responseInfected.bodyBytes != null) {
+          if (!kReleaseMode) {
+            print('load infected from web');
+          }
+          var decodedBody = utf8.decode(responseInfected.bodyBytes);
+          infectedDataSet = DataParser.parseData(decodedBody);
+          etagInfected = responseInfected.headers['etag'];
+          FileStorage.writeInfectedFile(decodedBody);
+        } else if (responseInfected.statusCode == 304 && infectedFile != null) {
+          if (!kReleaseMode) {
+            print('load infected from file');
+          }
+          var decodedBody = await infectedFile.readAsString();
+          infectedDataSet = DataParser.parseData(decodedBody);
+        } else {
+          if (!kReleaseMode) {
+            print('load infected failed');
+          }
+          fetchingFailed = true;
+        }
+      }
 
       final responseRecovered = await http
           .get(
             '$requestStringRecovered',
-            /* headers: {
-              "If-Modified-Since": ifModifiedSince,
-              "If-None-Match": ifNoneMatch,
-            },*/
+            headers: {
+              "If-None-Match": ifNoneMatchRecovered,
+            },
           )
           .timeout(const Duration(seconds: 20))
           .catchError((e) {});
 
-      List<DataSet> recoveredDataSet = DataParser.parseData(
-          utf8.decode(responseRecovered.bodyBytes));
+      if (responseRecovered != null) {
+        if (responseRecovered.statusCode == 200 &&
+            responseRecovered.bodyBytes != null) {
+          if (!kReleaseMode) {
+            print('load recovered from web');
+          }
+          var decodedBody = utf8.decode(responseRecovered.bodyBytes);
+          recoveredDataSet = DataParser.parseData(decodedBody);
+          etagRecovered = responseRecovered.headers['etag'];
+          FileStorage.writeRecoveredFile(decodedBody);
+        } else if (responseRecovered.statusCode == 304 &&
+            recoveredFile != null) {
+          if (!kReleaseMode) {
+            print('load recovered from file');
+          }
+          var decodedBody = await recoveredFile.readAsString();
+          recoveredDataSet = DataParser.parseData(decodedBody);
+        } else {
+          if (!kReleaseMode) {
+            print('load recovered failed');
+          }
+          fetchingFailed = true;
+        }
+      }
 
-      final deathInfected = await http
+      final responseDeceased = await http
           .get(
             '$requestStringDeath',
-            /* headers: {
-              "If-Modified-Since": ifModifiedSince,
-              "If-None-Match": ifNoneMatch,
-            },*/
+            headers: {
+              "If-None-Match": ifNoneMatchDeceased,
+            },
           )
           .timeout(const Duration(seconds: 20))
           .catchError((e) {});
 
-      List<DataSet> deathDataSet = DataParser.parseData(
-          utf8.decode(deathInfected.bodyBytes));
-
-      Covid19Data data = Covid19Data(
-        infected: infectedDataSet,
-        recovered: recoveredDataSet,
-        dead: deathDataSet,
-      );
-      return data;
-/*
-      ///If the HTTP Status code is 200 OK use the Fahrplan from the response,
-      ///Else if the HTTP Status Code is 304 Not Modified use the local file.
-      ///Else if a local fahrplan file is available use it
-      ///Else return empty fahrplan
-      if (response != null) {
-        if (response.statusCode == 200 && response.bodyBytes != null) {
-          fahrplanJson = utf8.decode(response.bodyBytes);
-
-          /// Store the etag
-          String etag = response.headers['etag'];
-          FileStorage.writeIfNoneMatchFile('$etag');
-
-          /// Store the fetched JSON
-          FileStorage.writeDataFile(fahrplanJson);
-
-          return new FahrplanDecoder().decodeFahrplanFromJson(
-            json.decode(fahrplanJson)['schedule'],
-            favTalks,
-            settings,
-            FahrplanFetchState.successful,
-          );
-        } else if (response.statusCode == 304 && fahrplanFile != null) {
-          fahrplanJson = await fahrplanFile.readAsString();
-          if (fahrplanJson != null && fahrplanJson != '') {
-            return new FahrplanDecoder().decodeFahrplanFromJson(
-              json.decode(fahrplanJson)['schedule'],
-              favTalks,
-              settings,
-              FahrplanFetchState.successful,
-            );
+      if (responseDeceased != null) {
+        if (responseDeceased.statusCode == 200 &&
+            responseDeceased.bodyBytes != null) {
+          if (!kReleaseMode) {
+            print('load deceased from web');
           }
-        } else {
-          return new Fahrplan(
-            fetchState: FahrplanFetchState.timeout,
-            fetchMessage: 'Please check your network connection.',
-          );
-        }
-      } else {
-        if (fahrplanFile != null) {
-          fahrplanJson = await fahrplanFile.readAsString();
-          if (fahrplanJson != null && fahrplanJson != '') {
-            return new FahrplanDecoder().decodeFahrplanFromJson(
-              json.decode(fahrplanJson)['schedule'],
-              favTalks,
-              settings,
-              FahrplanFetchState.successful,
-            );
+          var decodedBody = utf8.decode(responseDeceased.bodyBytes);
+          deceasedDataSet = DataParser.parseData(decodedBody);
+          etagDeceased = responseDeceased.headers['etag'];
+          FileStorage.writeDeceasedFile(decodedBody);
+        } else if (responseDeceased.statusCode == 304 &&
+            recoveredFile != null) {
+          if (!kReleaseMode) {
+            print('load deceased from file');
           }
+          var decodedBody = await deceasedFile.readAsString();
+          deceasedDataSet = DataParser.parseData(decodedBody);
         } else {
-          return new Fahrplan(
-            fetchState: FahrplanFetchState.timeout,
-            fetchMessage: 'Please check your network connection.',
-          );
+          if (!kReleaseMode) {
+            print('load deceased failed');
+          }
+          fetchingFailed = true;
         }
       }
 
-      /// If not connected, try to load from file, otherwise set Fahrplan.isEmpty
+      if (responseInfected != null &&
+          responseRecovered != null &&
+          responseDeceased != null &&
+          etagInfected != null &&
+          etagRecovered != null &&
+          etagDeceased != null) {
+        FileStorage.writeEtagFileWithValues(
+            etagInfected, etagRecovered, etagDeceased);
+      }
+
+      /// If not connected, try to load all from file
     } else {
-      if (fahrplanFile != null) {
-        fahrplanJson = await fahrplanFile.readAsString();
-        if (fahrplanJson != null && fahrplanJson != '') {
-          return new FahrplanDecoder().decodeFahrplanFromJson(
-            json.decode(fahrplanJson)['schedule'],
-            favTalks,
-            settings,
-            FahrplanFetchState.successful,
-          );
-        }
+      if (infectedFile != null &&
+          recoveredFile != null &&
+          deceasedFile != null) {
+        var decodedBodyInfected = await infectedFile.readAsString();
+        infectedDataSet = DataParser.parseData(decodedBodyInfected);
+        var decodedBodyRecovered = await recoveredFile.readAsString();
+        recoveredDataSet = DataParser.parseData(decodedBodyRecovered);
+        var decodedBodyDeceased = await deceasedFile.readAsString();
+        deceasedDataSet = DataParser.parseData(decodedBodyDeceased);
       } else {
-        return new Fahrplan(
-          fetchState: FahrplanFetchState.noDataConnection,
-          fetchMessage: 'Please enable mobile data or Wifi.',
-        );
+        if (!kReleaseMode) {
+          print('not connected trying to load all from file');
+        }
+        fetchingFailed = true;
       }
     }
 
- */
-    }
+    Covid19Data data = Covid19Data(
+      infected: infectedDataSet,
+      recovered: recoveredDataSet,
+      deceased: deceasedDataSet,
+      fetchingFailed: fetchingFailed,
+    );
+    return data;
   }
 }
