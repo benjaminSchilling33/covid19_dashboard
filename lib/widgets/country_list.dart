@@ -40,7 +40,7 @@ class CountryList extends State<CountryListState> {
         String itemName = item.provinceState +
             (item.provinceState == '' ? '' : ',') +
             item.countyRegion;
-        if (itemName.contains(query)) {
+        if (itemName.toLowerCase().contains(query.toLowerCase())) {
           dummyListData.add(item);
         }
       });
