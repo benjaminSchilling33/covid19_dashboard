@@ -96,6 +96,9 @@ class FileStorage {
     final file = await localDeceasedFile;
 
     // Write the file
+    if (!kReleaseMode) {
+      print('Write deceased to file: $data');
+    }
     return file.writeAsString('$data', mode: FileMode.write);
   }
 

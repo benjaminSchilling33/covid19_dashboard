@@ -75,7 +75,11 @@ class DataSetFetcher {
             },
           )
           .timeout(const Duration(seconds: 20))
-          .catchError((e) {});
+          .catchError((e) {
+            if (!kReleaseMode) {
+              print(e);
+            }
+          });
 
       if (responseInfected != null) {
         if (responseInfected.statusCode == 200 &&
@@ -109,7 +113,11 @@ class DataSetFetcher {
             },
           )
           .timeout(const Duration(seconds: 20))
-          .catchError((e) {});
+          .catchError((e) {
+            if (!kReleaseMode) {
+              print(e);
+            }
+          });
 
       if (responseRecovered != null) {
         if (responseRecovered.statusCode == 200 &&
@@ -144,7 +152,11 @@ class DataSetFetcher {
             },
           )
           .timeout(const Duration(seconds: 20))
-          .catchError((e) {});
+          .catchError((e) {
+            if (!kReleaseMode) {
+              print(e);
+            }
+          });
 
       if (responseDeceased != null) {
         if (responseDeceased.statusCode == 200 &&
@@ -198,6 +210,16 @@ class DataSetFetcher {
         }
         fetchingFailed = true;
       }
+    }
+
+    if (!kReleaseMode) {
+      print('Infected: $infectedDataSet');
+    }
+    if (!kReleaseMode) {
+      print('Recovered: $recoveredDataSet');
+    }
+    if (!kReleaseMode) {
+      print('Deceased: $deceasedDataSet');
     }
 
     Covid19Data data = Covid19Data(

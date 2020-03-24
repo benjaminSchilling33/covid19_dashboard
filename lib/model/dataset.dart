@@ -60,6 +60,9 @@ class DataSet {
       List<String> entries, List<String> headlines) {
     List<DataPoint> points = List<DataPoint>();
     for (int i = 0; i < entries.length; i++) {
+      if (headlines[i].isEmpty || entries[i].isEmpty) {
+        continue;
+      }
       String date = headlines[i];
       // Convert data from format <month>/<day>/<year> to <year><month><day>
       String dateCorrectFormat = '20' +
