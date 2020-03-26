@@ -11,9 +11,13 @@ import 'package:covid19_dashboard/utilities/my_license_registerer.dart';
 import 'package:covid19_dashboard/utilities/syncfusion_license_registerer.dart';
 import 'package:covid19_dashboard/widgets/country_list.dart';
 import 'package:covid19_dashboard/widgets/covid_map.dart';
+import 'package:covid19_dashboard/widgets/who_advices.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_core/core.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   final SyncfusionLicenseRegisterer licenseRegisterer = MyLicenseRegisterer();
@@ -157,7 +161,48 @@ class Covid19DashboardApp extends StatelessWidget {
                               );
                             },
                           ),
-                        )
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                          child: RaisedButton(
+                            child: Text('Recommendations by WHO'),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => WHORecommendations(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                          child: RaisedButton(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                  padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                  child: FaIcon(
+                                    FontAwesomeIcons.twitterSquare,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Text('#FlattenTheCurve'),
+                              ],
+                            ),
+                            onPressed: () async {
+                              if (await canLaunch(
+                                  'https://twitter.com/hashtag/flattenthecurve')) {
+                                await launch(
+                                    'https://twitter.com/hashtag/flattenthecurve');
+                              } else {
+                                throw 'Could not launch https://twitter.com/hashtag/flattenthecurve';
+                              }
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),

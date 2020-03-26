@@ -30,22 +30,19 @@ class DataSet {
     List<String> entries = entry.split(new RegExp(r',(?![\s\w\.]+\")'));
 
     List<String> headlines = headline.split(',');
+
+    List<DataPoint> points = entriesToDataPoints(
+      entries.sublist(4),
+      headlines.sublist(4),
+    );
     return DataSet(
-        provinceState: entries[0].replaceAll('\"', ''),
-        countyRegion: entries[1].replaceAll('\"', ''),
-        coords: LatLng(double.parse(entries[2]), double.parse(entries[3])),
-        dataPoints: entriesToDataPoints(
-          entries.sublist(4),
-          headlines.sublist(4),
-        ),
-        lastValue: lastValueOfEntries(entriesToDataPoints(
-          entries.sublist(4),
-          headlines.sublist(4),
-        )),
-        lastDate: lastDateOfEntries(entriesToDataPoints(
-          entries.sublist(4),
-          headlines.sublist(4),
-        )));
+      provinceState: entries[0].replaceAll('\"', ''),
+      countyRegion: entries[1].replaceAll('\"', ''),
+      coords: LatLng(double.parse(entries[2]), double.parse(entries[3])),
+      dataPoints: points,
+      lastValue: lastValueOfEntries(points),
+      lastDate: lastDateOfEntries(points),
+    );
   }
 
   static DateTime lastDateOfEntries(List<DataPoint> dataPoints) {
@@ -73,10 +70,14 @@ class DataSet {
           (int.parse(date.split('/')[1]) < 10
               ? '0' + date.split('/')[1]
               : date.split('/')[1]);
-      points.add(DataPoint(
-        date: DateTime.parse(dateCorrectFormat),
-        value: int.parse(entries[i]),
-      ));
+      if (int.parse(entries[i]) >= 0) {
+        points.add(
+          DataPoint(
+            date: DateTime.parse(dateCorrectFormat),
+            value: int.parse(entries[i]),
+          ),
+        );
+      }
     }
     return points;
   }

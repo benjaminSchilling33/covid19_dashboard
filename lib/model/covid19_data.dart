@@ -6,6 +6,7 @@ Copyright (C) 2020 Benjamin Schilling
 */
 
 import 'package:covid19_dashboard/model/dataset.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -79,6 +80,10 @@ class Covid19Data {
           ),
         ),
       );
+      if (!kReleaseMode) {
+        print(
+            'Added infected circle for ${infected[i].provinceState + infected[i].countyRegion} with radius ${infected[i].lastValue.roundToDouble() * 10}');
+      }
     }
     recovered.forEach((dp) {
       circles.add(
@@ -96,6 +101,10 @@ class Covid19Data {
           ),
         ),
       );
+      if (!kReleaseMode) {
+        print(
+            'Added recovered circle for ${dp.provinceState + dp.countyRegion} with radius ${dp.lastValue.roundToDouble() * 10}');
+      }
     });
     deceased.forEach((dp) {
       circles.add(
@@ -113,6 +122,10 @@ class Covid19Data {
           ),
         ),
       );
+      if (!kReleaseMode) {
+        print(
+            'Added deceased circle for ${dp.provinceState + dp.countyRegion} with radius ${dp.lastValue.roundToDouble() * 10}');
+      }
     });
   }
 
